@@ -1,0 +1,102 @@
+const mysql = require('../../../core/Mysql');
+const async = require('async');
+var fs = require('fs');
+var pdf = require('html-pdf');
+var path = require('path');
+const base = path.resolve('./web/classes/profession/industry_pdf/res');
+//var html = fs.readFileSync('./test/businesscard.html', 'utf8');
+var pdf_options = {
+    "height": "14in",        // allowed units: mm, cm, in, px
+    "width": "9in",
+    "header": {
+        "height": "20mm",
+        "contents": {
+            first: ` `,
+            2:" ",
+            default: `<div style="padding-top:30px;"><div class='page_header' style='font-size: 14px;
+                font-family: 'SourceHan';
+                border-bottom:2px solid rgba(0,0,0,0.5);
+                margin-bottom: 30px;
+                display: flex;
+                display: -webkit-flex;
+                justify-content: space-between;
+                -webkit-justify-content: space-between;
+                align-items: flex-end;
+                -webkit-align-items: flex-end;
+                color:rgba(0,0,0,0.6);
+                width:85%;
+                margin:0 auto;'>
+				<div style='font-size: 16px;width:64px;border-bottom:1px solid #666;'>行业情报</div>
+				<div style='font-size: 14px;width:64px;text-align:right'>财经秘书</div>
+			</div><div>`
+        }
+    },
+
+    "paginationOffset": 1,
+    "type": "pdf",             // allowed file types: png, jpeg, pdf
+    "quality": "75",
+    "orientation": "portrait",
+    "footer": {
+        "height": "16mm",
+        "contents": {
+            first: ` `,
+            2:`<span style="font-size: 15px;
+                        font-family: 'SourceHan';
+                        float: left;
+                        width:100%;
+                        text-align: center;
+                        color:rgba(0,0,0,0.6);
+                        border-top:2px solid rgba(0,0,0,0.5);
+                        width:85%;
+                        margin:0 5%;
+                        padding-top:8px;
+                        padding-bottom:20px;
+                        ">财经头条</span>`,
+            default: `<span style="font-size: 15px;
+                        font-family: 'SourceHan';
+                        float: left;
+                        width:100%;
+                        text-align: center;
+                        color:rgba(0,0,0,0.6);
+                        border-top:2px solid rgba(0,0,0,0.5);
+                        width:85%;
+                        margin:0 7.5%;
+                        padding-top:8px;
+                        padding-bottom:20px;
+                        ">{{page}}</span>`// fallback value
+        }
+    },
+    "childProcessOptions": {
+        "detached": true
+    },
+    "base":`file://${base}/`
+}
+
+
+
+const getProfessionInfosHtml = function(options,finalCallback){//start_time,end_time 为YYYY-MM-dd
+    let info_list = [];
+    let html_string = "";
+    let profession_name = "";
+    let word_string = "";
+    let profession_id = options['profession_id'] || 0;
+    let start_time = options['start_time'] || 0;
+    let end_time = options['end_time'] || 0;
+    let generate_time = options['generate_time'] || formatDate(new Date());
+    let period = options['period'] || 1;
+    let to_type = options['to_type'] || 'pdf';
+    async.series([
+            cb =>{//生成html
+		cb()
+	}
+        ],
+        (err,result)=>{//生成buffer类型
+            if(err){
+                finalCallback(err);
+            } else {
+                pdf.create(html_string, pdf_options).toBuffer(function(err, buf) {
+                    finalCallback(null,buf);
+                });
+            }
+        })
+}
